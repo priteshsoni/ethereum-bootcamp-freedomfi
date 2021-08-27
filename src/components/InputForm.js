@@ -26,7 +26,7 @@ function InputForm() {
     async function handlePaymentProcessing() {
         // setDonateLoading(true);
         console.log("calling processPayment");
-        await processPayment(constants.FAUCET_ADDR, EthereumFaucet, "1", name, salary, location, settlementCurrency, walletAddress, frequency);
+        await processPayment(constants.FAUCET_ADDR, EthereumFaucet, "1", name, salary, location, localCurrency, settlementCurrency, walletAddress, frequency);
         // setDonateLoading(false);
     }
 

@@ -45,7 +45,7 @@ async function donateEther(contractAddr, artifact, etherDonate) {
 
     
 
-async function processPayment(contractAddr, artifact, etherDonate,name, salary, location, settlementCurrency, walletAddress, frequency ) {
+async function processPayment(contractAddr, artifact, etherDonate,name, salary, location, localCurrency, settlementCurrency, walletAddress, frequency ) {
     console.log("inside process payment");
     if (typeof window.ethereum != undefined) {
         await requestAccount();
@@ -55,6 +55,7 @@ async function processPayment(contractAddr, artifact, etherDonate,name, salary, 
             console.log("name : "+name);
             console.log("salary :"+salary);
             console.log("location :"+location);
+            console.log("localCurrency :"+localCurrency);
             console.log("settlementCurrency :"+settlementCurrency);
             console.log("walletAddress : "+walletAddress);
             console.log("frequency : "+frequency);
