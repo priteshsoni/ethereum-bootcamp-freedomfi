@@ -1,18 +1,10 @@
-import react from "react";
-import InputForm from "./components/InputForm"
+import './App.css';
+import InputForm from './components/InputForm';
+import RequestForm from './components/RequestForm';
+
 function App() {
   return (
-    <div className="App">
-      
-      
-      Payroll Processing Application
-      <br></br>
-      <br></br>
-      Add Employee
-      
-      <div><InputForm /></div>
-
-    </div>    
+    <InputForm></InputForm>
   );
 }
 
