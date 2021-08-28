@@ -107,8 +107,10 @@ async function withdrawlForStream(contractAddr, artifact, EmployeeID ) {
 
             let receipt = await transaction.wait();
         //    let streamId = receipt.events[2].args[0].toString();
-            // console.log(streamId);
             console.log(receipt.events);
+            let streamID = receipt.events[1].args[0].toString();
+            console.log(streamID);
+            return streamID;
 
         }
         catch (err) {
