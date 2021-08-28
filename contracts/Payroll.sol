@@ -1,33 +1,27 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-
-//import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
+pragma solidity ^0.8.3;
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-
-
-
 contract Payroll {
     using SafeMath for uint256;
     using Counters for Counters.Counter;
-//    using Chainlink for Chainlink.Request;
+//  using Chainlink for Chainlink.Request;
+    AggregatorV3Interface internal priceFeed;
     
+     uint256 internal paymentPeriod = 31536000;
+     
+     uint internal eth_usd = 3275;
+         
      address public owner;
-
     /**
      * @notice Counter for new compensation ids.
      */
     Counters.Counter public compIdCounter;
     Counters.Counter public streamIdCounter;
-
     constructor() {
         owner  = msg.sender;
     }
-
-
-    /**
-     * @dev Throws if the caller is not the sender of the recipient of the stream.
-     */
     modifier onlyRecipient(uint256 streamId) {
         require(
              msg.sender == streams[streamId].recipient,
@@ -35,7 +29,6 @@ contract Payroll {
         );
         _;
     }
-
     /**
      * @dev Throws if the id does not point to a valid stream.
      */
@@ -44,29 +37,23 @@ contract Payroll {
         _;
     }
     
-
     
     /**
      * @dev The stream objects identifiable by their unsigned integer ids.
      */
-    mapping(uint256 => Stream) private streams;
+    mapping(uint256 => Stream) public streams;
     
-    mapping(uint256 => Compensation) private comp;
-
-
-
+    mapping(uint256 => Compensation) public comp;
       struct Stream {
         address recipient;
         address sender;
-       // uint256 deposit;
+        string localCurrency;
+        string settlementCurrency;
         uint256 prevTransacTime;
-       // uint256 stopTime;
         uint256 rate;
         uint256 balance;
         bool isEntity;
     }
-
-
     
     struct Compensation{
         address recipient;
@@ -86,15 +73,15 @@ contract Payroll {
         uint256 indexed streamId,
         address indexed sender,
         address indexed recipient,
+        string localCurrency,
+        string settlementCurrency,
         uint256 balance,
         uint256 prevTransacTime
     );
-
     /**
      * @notice Emits when the recipient of a stream withdraws a portion or all their pro rata share of the stream.
      */
     event WithdrawFromStream(uint256 indexed streamId, address indexed recipient);
-
     /**
      * @notice Emits when a stream is successfully cancelled and tokens are transferred back on a pro rata basis.
      */
@@ -103,44 +90,40 @@ contract Payroll {
         address indexed recipient,
         uint256 balance
     );
-    
-    event Greet(string message);
-    
-   function greet() public {
-        emit Greet("Hello World!");
-    }
-
-function balanceOf( uint256 streamId) public view streamExists(streamId) returns (uint256 balance) {
+function balanceOf( uint256 streamId) public streamExists(streamId) returns (uint256 balance) {
         require(((msg.sender == owner) || (msg.sender == streams[streamId].recipient)), "Not an valid user");
   
         Stream memory stream = streams[streamId];
         uint256 elapsedTime = elapsedTimeFor(streamId);
         uint256 due = elapsedTime.mul(stream.rate);
-
+        
+        setPricebySymbol(streams[streamId].settlementCurrency);
+        
+        
+        uint256 currConvRate = uint256(getLatestPrice()); 
+        //to calculate the paycheck in dollars 
+        due = due * 10**8/currConvRate;
         //calculate the no of two week long instances elapsed between the start time and current time
         balance += due;
-
         return balance;
         
     }
-
+/* This function returns the toal number of pay periods elapsed since the most recent withdrawal*/
 function elapsedTimeFor(uint256 streamId) private view returns (uint256 delta) {
     Stream memory stream = streams[streamId];
     
     // Before the start of the stream
     if (block.timestamp <= stream.prevTransacTime) return 0;
     
-    // During the stream
+    // This function returns 
     if (block.timestamp > stream.prevTransacTime) {
-            return (block.timestamp - stream.prevTransacTime) % 14 days;
+            return (block.timestamp - stream.prevTransacTime) % 1 seconds;
     }
-
     
 }    
-
 function createCompensation(
         address recipient,
-        uint256 empStartTime,
+        //uint256 empStartTime,
         string memory name,
         uint256 annualSalary,
         string memory country,
@@ -148,16 +131,16 @@ function createCompensation(
         string memory settlementCurrency,
         uint256 frequency
     ) external returns(uint256 compId){
+        
+        require(recipient != address(0x00), "Stream to the zero address");
+        require(recipient != address(this), "Stream to the contract itself");
+        require(recipient != msg.sender, "Stream to the caller");
+        // require(deposit > 0, "Deposit is less that or equal to zero");
+        
         compIdCounter.increment();    
         compId = compIdCounter.current();
-
-        uint256 paycheck = annualSalary/26;
-        //1 USD = 20 pesos 
-        uint256 currConvRate = 1; // requestVolumeData(currency);
-
-        //to calculate the paycheck in dollars 
-        paycheck = paycheck/currConvRate;
-
+        uint256 empStartTime = block.timestamp;
+        uint256 paycheck = annualSalary/paymentPeriod;
         comp[compId] = Compensation ({
             recipient : recipient,
             empStartTime: empStartTime,
@@ -168,18 +151,17 @@ function createCompensation(
             settlementCurrency : settlementCurrency,
             frequency : frequency
         });
-
-        createStream(recipient,paycheck,empStartTime);
-
-        // return 1;
+        
+        
+        uint256 newStreamId = createStream(recipient,paycheck,empStartTime, localCurrency, settlementCurrency);
+        return compId;
     }
-
-
-
 function createStream(
             address recipient,
             uint256 rate,
-            uint256 prevTransacTime
+            uint256 prevTransacTime,
+            string memory localCurrency,
+            string memory settlementCurrency
     ) internal returns (uint256 streamId) {
         
         // Requires
@@ -199,25 +181,22 @@ function createStream(
         streamIdCounter.increment();    
         uint256 currentStreamId = streamIdCounter.current();
         
-        // Rate Per second
-       // uint256 rate = deposit.div(duration);
         
         streams[currentStreamId] = Stream({
            rate: rate,
            recipient: recipient,
+           localCurrency : localCurrency, 
+           settlementCurrency : settlementCurrency,
            sender: msg.sender,
            prevTransacTime: block.timestamp,
            balance: 0,
            isEntity: true
         });
         
-
         
-        emit CreateStream(currentStreamId, msg.sender, recipient, rate, prevTransacTime);
+        emit CreateStream(currentStreamId, msg.sender, recipient, localCurrency, settlementCurrency, rate, prevTransacTime);
         return currentStreamId;
     }
-
-
 /**
      *  @notice Withdraws from the contract to the recipient's account.
      *  @dev Throws if the id does not point to a valid stream.
@@ -234,19 +213,15 @@ function createStream(
         Stream memory stream = streams[streamId];
         uint256 balance = balanceOf(streamId);
         require(balance > 0, "Available balance is 0");
-
         // this will withdraw the entire balance 
-        (bool success, ) = payable(stream.recipient).call{value: balance, gas: 100000}("");
+        (bool success, ) = payable(stream.recipient).call{value: balance/eth_usd, gas: 100000}("");
         require(success, "Transaction failed");
         
         streams[streamId].balance = 0;
-
         streams[streamId].prevTransacTime = block.timestamp;
         
         emit WithdrawFromStream(streamId, stream.recipient);
     }
-
-
     /**
     * @notice Cancels the stream and transfers the tokens back on a pro rata basis.
     * @dev Throws if the id does not point to a valid stream.
@@ -259,15 +234,65 @@ function cancelStream( uint256 streamId)  external
     onlyRecipient(streamId) {
     Stream memory stream = streams[streamId];
     uint256 recipientBalance = balanceOf(streamId);
-
 //Question - why are we deleteing the streams[streamId] even before validating recipient's balance? 
     delete streams[streamId];
     if (recipientBalance > 0) {
         (bool success, ) = payable(stream.recipient).call{value: recipientBalance, gas: 100000}("");
         require(success, "Transaction failed");
     }
-
     emit CancelStream(streamId, stream.recipient, recipientBalance);
 } 
-
+   
+    
+    address internal GBP = 0x7B17A813eEC55515Fb8F49F2ef51502bC54DD40F;
+    address internal AUD = 0x21c095d2aDa464A294956eA058077F14F66535af;
+    address internal EUR = 0x78F9e60608bF48a1155b4B2A5e31F32318a1d85F;
+    address internal JPY = 0x3Ae2F46a2D84e3D5590ee6Ee5116B80caF77DeCA;
+    address internal USDC = 0xa24de01df22b63d23Ebc1882a5E3d4ec0d907bFB;
+    
+    address internal symbol;
+    
+    
+    /**
+     * Get latest price for one of the four currencies
+     * AUD, EUR, GBP, JPY
+     */
+    // function getPricebySymbol(string memory _currency) public returns (int) {
+        function setPricebySymbol(string memory _currency) public {
+        if (hashCompareWithLengthCheck(_currency,"AUD")) {
+            symbol = AUD;
+        } else if (hashCompareWithLengthCheck(_currency,"EUR")) {
+            symbol = EUR;
+        } else if (hashCompareWithLengthCheck(_currency,"GBP")) {
+            symbol = GBP;
+        } else if (hashCompareWithLengthCheck(_currency,"JPY")) {
+            symbol = JPY;
+        } else {
+            symbol = USDC;
+        }
+        priceFeed = AggregatorV3Interface(symbol);
+        // return getLatestPrice();
+    }
+    /**
+     * Returns the latest price
+     * Need to divide by 10**8 to get the final rate
+     */
+    function getLatestPrice() public view returns (int) {
+        (
+            uint80 roundID, 
+            int price,
+            uint startedAt,
+            uint timeStamp,
+            uint80 answeredInRound
+        ) = priceFeed.latestRoundData();
+        return price;
+    }
+    
+    function hashCompareWithLengthCheck(string memory a, string memory b) internal pure returns (bool) {
+    if(bytes(a).length != bytes(b).length) {
+        return false;
+    } else {
+        return keccak256(bytes(a)) == keccak256(bytes(b));
+    }
+}
 }

@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@chainlink/contracts": "^0.2.1",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
     "@openzeppelin/contracts": "^4.3.1",
