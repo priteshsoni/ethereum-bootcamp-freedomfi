@@ -3,14 +3,14 @@ const hre = require("hardhat");
 async function main() {
     const [deployer] = await hre.ethers.getSigners();
 
-    const EthereumFaucet = await hre.ethers.getContractFactory("EthereumFaucet");
-    const faucet = await EthereumFaucet.deploy();
+    const Payroll = await hre.ethers.getContractFactory("Payroll");
+    const payrollDeploy = await Payroll.deploy();
 
-    await faucet.deployed();
-    console.log(`Ethereum faucet deployed to address: ${faucet.address}`);
+    await payrollDeploy.deployed();
+    console.log(`Payroll deployed to address: ${payrollDeploy.address}`);
 
     // We also save the contract's artifacts and address in the proper directory
-    saveFrontendFiles(faucet);
+    saveFrontendFiles(payrollDeploy);
 }
 
 function saveFrontendFiles(faucet) {
@@ -21,10 +21,10 @@ function saveFrontendFiles(faucet) {
       fs.mkdirSync(contractsDir);
     }
   
-    const FaucetArtifact = artifacts.readArtifactSync("EthereumFaucet");
+    const FaucetArtifact = artifacts.readArtifactSync("Payroll");
   
     fs.writeFileSync(
-      contractsDir + "/EthereumFaucet.json",
+      contractsDir + "/Payroll.json",
       JSON.stringify(FaucetArtifact, null, 2)
     );
 }

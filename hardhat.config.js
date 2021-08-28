@@ -19,7 +19,9 @@ if (NETWORK == TEST_NETWORK) {
   networks = {
     rinkeby: {
       url: `https://eth-rinkeby.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
-      accounts: [`0x${WALLET_PRIVATE_KEY}`]
+      accounts: [`0x${WALLET_PRIVATE_KEY}`],
+      gas: 6500000,        // rinkeby has a lower block limit than mainnet
+      gasPrice: 10000000000
     }
   }
 }

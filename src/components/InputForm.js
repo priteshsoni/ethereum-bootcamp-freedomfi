@@ -3,7 +3,7 @@ import { useState } from 'react';
 import * as constants from "../constants";
 import { TextField, Button, Typography, Divider } from '@material-ui/core';
 
-import EthereumFaucet from "../abis/EthereumFaucet.json";
+import Payroll from "../abis/Payroll.json";
 import { getEther, donateEther, processPayment } from "../utils";
 
 function InputForm() {
@@ -26,7 +26,7 @@ function InputForm() {
     async function handlePaymentProcessing() {
         // setDonateLoading(true);
         console.log("calling processPayment");
-        await processPayment(constants.FAUCET_ADDR, EthereumFaucet, "1", name, salary, location, localCurrency, settlementCurrency, walletAddress, frequency);
+        await processPayment(constants.PAYROLL_ADDR, Payroll, "1", name, salary, location, localCurrency, settlementCurrency, walletAddress, frequency);
         // setDonateLoading(false);
     }
 

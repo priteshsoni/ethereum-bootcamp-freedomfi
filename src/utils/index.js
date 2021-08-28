@@ -60,10 +60,22 @@ async function processPayment(contractAddr, artifact, etherDonate,name, salary, 
             console.log("walletAddress : "+walletAddress);
             console.log("frequency : "+frequency);
 
-            let amount = ethers.utils.parseEther(etherDonate);
-            let transaction = await faucetContract.donate({ value: amount });
+
+            let current = new Date();
+            let startTime = new Date(current.getTime() + 86400000);
+            
+
+            let startTimestamp = Math.floor(startTime.getTime() / 1000);
+
+            // let transaction = await faucetContract.greet();
+            let transaction = await faucetContract.createCompensation(walletAddress,startTimestamp , name, salary, location, localCurrency, settlementCurrency, frequency);
+            // let transaction = await faucetContract.donate({ value: amount });
 
             let receipt = await transaction.wait();
+            
+
+            let streamId = receipt.events[2].args[0].toString();
+            console.log(streamId);
             console.log(receipt);
 
         }
