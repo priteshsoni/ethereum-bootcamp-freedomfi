@@ -6,6 +6,7 @@ import { TextField, Button, Typography, Divider } from '@material-ui/core';
 import Payroll from "../abis/Payroll.json";
 import { getEther, donateEther, processPayment } from "../utils";
 
+
 function InputForm() {
     const [name, setName] = useState();
     const [salary, setSalary] = useState();
@@ -14,6 +15,7 @@ function InputForm() {
     const [settlementCurrency, setSettlementCurrency] = useState();
     const [walletAddress, setWalletAddress] = useState();
     const [frequency, setFrequency] = useState();
+    const [status, setStatus] = useState();
 
     
 
@@ -25,9 +27,12 @@ function InputForm() {
 
     async function handlePaymentProcessing() {
         // setDonateLoading(true);
+        setStatus("Loading...");
         console.log("calling processPayment");
-        await processPayment(constants.PAYROLL_ADDR, Payroll, "1", name, salary, location, localCurrency, settlementCurrency, walletAddress, frequency);
+        let streamID = await processPayment(constants.PAYROLL_ADDR, Payroll, "1", name, salary, location, localCurrency, settlementCurrency, walletAddress, frequency);
+        console.log("streamId : "+streamID);
         // setDonateLoading(false);
+        setStatus("Stream ID : "+streamID);
     }
 
     // async function handleDonateEther() {
@@ -39,7 +44,7 @@ function InputForm() {
     return (
         <div className="App" style={{ padding: "50px" }}>
             <Typography variant="h4">
-               Payment Processing App
+                Freedom Fi
             </Typography>
 
            
@@ -58,7 +63,7 @@ function InputForm() {
 
             <Divider light /><br /><br />
 
-           
+            <p>{status}</p>
         </div>
     );
 }

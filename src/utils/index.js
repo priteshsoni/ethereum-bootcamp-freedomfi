@@ -47,6 +47,7 @@ async function donateEther(contractAddr, artifact, etherDonate) {
 
 async function processPayment(contractAddr, artifact, etherDonate,name, salary, location, localCurrency, settlementCurrency, walletAddress, frequency ) {
     console.log("inside process payment");
+    // setStatus("Loading...");
     if (typeof window.ethereum != undefined) {
         await requestAccount();
 
@@ -74,9 +75,40 @@ async function processPayment(contractAddr, artifact, etherDonate,name, salary, 
             let receipt = await transaction.wait();
             
 
-            let streamId = receipt.events[2].args[0].toString();
-            console.log(streamId);
-            console.log(receipt);
+            // let streamId = receipt.events[2].args[0].toString();
+            // console.log(streamId);
+            console.log("Getting events from receipt")
+            let streamId = receipt.events[0].args[0].toString();
+            // console.log("stream ID : "+streamId);
+            // setStatus(`Stream ID: ${streamId}`);
+            
+            return streamId;
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+}
+
+
+
+async function withdrawlForStream(contractAddr, artifact, EmployeeID ) {
+    console.log("inside withdrawl ");
+    if (typeof window.ethereum != undefined) {
+        await requestAccount();
+
+        const faucetContract = getContract(contractAddr, artifact);
+        try {
+            console.log("employeeID : " + EmployeeID);
+           
+            // let transaction = await faucetContract.greet();
+            let transaction = await faucetContract.withdrawFromStream(EmployeeID);
+            // let transaction = await faucetContract.donate({ value: amount });
+
+            let receipt = await transaction.wait();
+        //    let streamId = receipt.events[2].args[0].toString();
+            // console.log(streamId);
+            console.log(receipt.events);
 
         }
         catch (err) {
@@ -85,4 +117,29 @@ async function processPayment(contractAddr, artifact, etherDonate,name, salary, 
     }
 }
 
-export { getEther, donateEther, processPayment }
+async function checkBalanceForStream(contractAddr, artifact, EmployeeID ) {
+    console.log("inside check balance ");
+    if (typeof window.ethereum != undefined) {
+        await requestAccount();
+
+        const faucetContract = getContract(contractAddr, artifact);
+        try {
+            console.log("employeeID : " + EmployeeID);
+           
+            // let transaction = await faucetContract.greet();
+            let transaction = await faucetContract.balanceOf(EmployeeID);
+            // let transaction = await faucetContract.donate({ value: amount });
+
+            let receipt = await transaction.wait();
+        //    let streamId = receipt.events[2].args[0].toString();
+            // console.log(streamId);
+            console.log(receipt.events);
+
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+}
+
+export { checkBalanceForStream, donateEther, processPayment, getEther, withdrawlForStream }
