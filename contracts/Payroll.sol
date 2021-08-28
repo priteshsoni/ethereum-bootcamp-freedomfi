@@ -130,7 +130,7 @@ contract Payroll {
         uint256 balance
     );
     
-    function balanceOf( uint256 streamId) public view streamExists(streamId) returns (uint256 balance) {
+    function balanceOf( uint256 streamId) public streamExists(streamId) returns (uint256 balance) {
         require(((msg.sender == owner) || (msg.sender == streams[streamId].recipient)), "Not an valid user");
   
         Stream memory stream = streams[streamId];
@@ -147,7 +147,7 @@ contract Payroll {
         //calculate the no of two week long instances elapsed between the start time and current time
         balance += due;
         
-        // emit BalanceOf(streamId, balance);
+        emit BalanceOf(streamId, balance);
         return balance;
         
     }
