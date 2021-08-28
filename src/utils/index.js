@@ -69,7 +69,7 @@ async function processPayment(contractAddr, artifact, etherDonate,name, salary, 
             let startTimestamp = Math.floor(startTime.getTime() / 1000);
 
             // let transaction = await faucetContract.greet();
-            let transaction = await faucetContract.createCompensation(walletAddress , name, salary, location, localCurrency, settlementCurrency, frequency);
+            let transaction = await faucetContract.createCompensation(walletAddress , 1, name, salary, location, localCurrency, settlementCurrency, frequency);
             // let transaction = await faucetContract.donate({ value: amount });
 
             let receipt = await transaction.wait();
