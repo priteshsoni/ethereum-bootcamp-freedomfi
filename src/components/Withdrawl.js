@@ -38,7 +38,7 @@ function Withdrawl() {
     return (
         <div className="App" style={{ padding: "50px" }}>
             <Typography variant="h4">
-               Freedom Fi
+               FreedomFi
             </Typography>
 
            
@@ -46,7 +46,7 @@ function Withdrawl() {
            
 
             <Button onClick={withdrwalForEmployee} variant="contained" color="primary">
-                Withdrawl
+                Withdraw
             </Button><br /><br /><br />
 
             <Divider light /><br /><br />

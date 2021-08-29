@@ -25,7 +25,7 @@ function CheckBalance() {
         let balance = await checkBalanceForStream(constants.PAYROLL_ADDR, Payroll, EmployeeID);
         console.log("balance : "+balance);
         // setDonateLoading(false);
-        setStatus("Balance : "+balance);
+        setStatus("Balance : "+balance +" USD");
     }
 
     // async function handleDonateEther() {
@@ -37,7 +37,7 @@ function CheckBalance() {
     return (
         <div className="App" style={{ padding: "50px" }}>
             <Typography variant="h4">
-                Freedom Fi
+                FreedomFi
             </Typography>
 
            

@@ -3,6 +3,7 @@ import InputForm from './components/InputForm';
 import CheckBalance from './components/CheckBalance';
 import Withdrawl from './components/Withdrawl';
 import RequestForm from './components/RequestForm';
+import { TextField, Button, Typography, Divider } from '@material-ui/core';
 
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
@@ -26,11 +27,12 @@ import { useState } from "react";
   
   return (
     <div className="App">
+       
     <AppBar position="static">
       <Tabs value={tabValue} onChange={handleTabChange} aria-label="Payment Streams">
-        <Tab label="Add Employee" {...a11yProps(0)} />
-        <Tab label="Check Balance" {...a11yProps(1)} />
-        <Tab label="Withdraw" {...a11yProps(2)} />
+        <Tab label=" Setup Employee Payrol" {...a11yProps(0)} />
+        <Tab label="Check Salary Balance" {...a11yProps(1)} />
+        <Tab label="Withdraw Salary" {...a11yProps(2)} />
       </Tabs>
     </AppBar>
 

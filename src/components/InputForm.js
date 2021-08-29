@@ -32,7 +32,7 @@ function InputForm() {
         let streamID = await processPayment(constants.PAYROLL_ADDR, Payroll, "1", name, salary, location, localCurrency, settlementCurrency, walletAddress, frequency);
         console.log("streamId : "+streamID);
         // setDonateLoading(false);
-        setStatus("Stream ID : "+streamID);
+        setStatus("Employee ID : "+streamID);
     }
 
     // async function handleDonateEther() {
@@ -44,7 +44,7 @@ function InputForm() {
     return (
         <div className="App" style={{ padding: "50px" }}>
             <Typography variant="h4">
-                Freedom Fi
+                FreedomFi
             </Typography>
 
            

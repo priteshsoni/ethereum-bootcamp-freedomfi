@@ -108,7 +108,7 @@ async function withdrawlForStream(contractAddr, artifact, EmployeeID ) {
             let receipt = await transaction.wait();
         //    let streamId = receipt.events[2].args[0].toString();
             console.log(receipt.events);
-            let streamID = receipt.events[1].args[0].toString();
+            let streamID = receipt.events[2].args[0].toString();
             console.log(streamID);
             return streamID;
 
@@ -133,9 +133,18 @@ async function checkBalanceForStream(contractAddr, artifact, EmployeeID ) {
             // let transaction = await faucetContract.donate({ value: amount });
 
             let receipt = await transaction.wait();
+            console.log(receipt.events);
         //    let streamId = receipt.events[2].args[0].toString();
             // console.log(streamId);
-            console.log(receipt.events);
+            let balance = receipt.events[0].args[1].toString();
+            console.log("balance :"+balance);
+
+            let parsedValue = ethers.utils.formatEther(balance); 
+            
+            
+            console.log("parsed : "+parsedValue);
+           
+            return parsedValue;
 
         }
         catch (err) {
