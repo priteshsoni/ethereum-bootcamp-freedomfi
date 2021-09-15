@@ -122,25 +122,17 @@ async function withdrawlForStream(contractAddr, artifact, EmployeeID ) {
 async function checkBalanceForStream(contractAddr, artifact, EmployeeID ) {
     console.log("inside check balance ");
     if (typeof window.ethereum != undefined) {
-        await requestAccount();
+        // await requestAccount();
 
-        const faucetContract = getContract(contractAddr, artifact);
+        const payrollContract = getContract(contractAddr, artifact);
         try {
             console.log("employeeID : " + EmployeeID);
            
-            // let transaction = await faucetContract.greet();
-            let transaction = await faucetContract.balanceOf(EmployeeID);
-            // let transaction = await faucetContract.donate({ value: amount });
+            let balance = await payrollContract.balanceOf(EmployeeID);
 
-            let receipt = await transaction.wait();
-            console.log(receipt.events);
-        //    let streamId = receipt.events[2].args[0].toString();
-            // console.log(streamId);
-            let balance = receipt.events[0].args[1].toString();
             console.log("balance :"+balance);
-
-            let parsedValue = ethers.utils.formatEther(balance); 
-            
+           
+            let parsedValue = ethers.utils.formatEther(balance);
             
             console.log("parsed : "+parsedValue);
            
